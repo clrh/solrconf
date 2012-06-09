@@ -1,0 +1,84 @@
+<?xml version="1.0" ?>
+<schema name="Koha Bibliographic Index" version="1.1">
+  <types>
+    <fieldtype name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true"/>
+    <fieldtype name="integer" class="solr.IntField" omitNorms="true"/>
+    <fieldtype name="date" class="solr.DateField" sortMissingLast="true" omitNorms="true"/>
+
+    <fieldtype name="simple_text" class="solr.TextField" positionIncrementGap="100" >
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.StandardFilterFactory"/>
+        <charFilter class="solr.MappingCharFilterFactory" mapping="mapping-ISOLatin1Accent.txt"/>
+        <filter class="solr.ElisionFilterFactory" articles="elisionwords.txt"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_fr.txt" enablePositionIncrements="true"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+    </fieldtype>
+
+    <fieldtype name="text" class="solr.TextField" positionIncrementGap="100" >
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <!-- remove dots from acronyms -->
+        <filter class="solr.StandardFilterFactory"/>
+        <!-- find letters with diacritics when looking for e/a/ou -->
+        <charFilter class="solr.MappingCharFilterFactory" mapping="mapping-ISOLatin1Accent.txt"/>
+        <!-- no more l' d' qu' etc. based on elision words file -->
+        <filter class="solr.ElisionFilterFactory" articles="elisionwords.txt"/>
+        <!-- no more le la les du  etc. based on stopwords file -->
+        <!--<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_fr.txt" enablePositionIncrements="true"/>-->
+        <!-- data will be pushed in lower case (during indexing and search) -->
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <!-- texts will be found with their synonyms if written in synonyms file -->
+        <!--<filter class="solr.SynonymFilterFactory" synonyms="synonyms_fr.txt" ignoreCase="true" expand="true"/>-->
+        <!-- Phonetic / Metaphone search -->
+        <!--<filter class="solr.PhoneticFilterFactory" encoder="DoubleMetaphone"/>-->
+        <!-- Stemming search -->
+        <!--<filter class="solr.SnowballPorterFilterFactory" language="French" />-->
+        <!-- Remove duplicate tokens if same text and position value -->
+        <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
+      </analyzer>
+    </fieldtype>
+
+    <fieldType name="string_srt" class="solr.TextField" omitNorms="true">
+        <analyzer>
+            <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <filter class="solr.LowerCaseFilterFactory"/>
+            <filter class="solr.ASCIIFoldingFilterFactory"/> <!-- convert accented chars to ASCII -->
+        </analyzer>
+    </fieldType>
+  </types>
+ <fields>
+
+   <!-- Core Fields  -->
+   <field name="id"         type="string" indexed="true" stored="true"/>
+   <field name="recordtype" type="string" indexed="true" stored="true"/>
+   <field name="recordid"   type="string" indexed="true" stored="true"/>
+
+   <field name="allfields" type="text" indexed="true" stored="false" multiValued="true" />
+
+   <!-- Dynamic MARC field indexing -->
+   <dynamicField name="str_*"      type="string"        indexed="true" stored="true" multiValued="true"/>
+   <dynamicField name="txt_*"      type="text"          indexed="true" stored="true" multiValued="true"/>
+   <dynamicField name="int_*"      type="integer"       indexed="true" stored="true" multiValued="true"/>
+   <dynamicField name="date_*"     type="date"          indexed="true" stored="true" multiValued="true"/>
+   <dynamicField name="ste_*"      type="simple_text"   indexed="true" stored="true" multiValued="true"/>
+
+   <dynamicField name="srt_str_*"  type="string_srt"        indexed="true" stored="true" multiValued="false"/>
+   <dynamicField name="srt_txt_*"  type="string_srt"        indexed="true" stored="true" multiValued="false"/>
+   <dynamicField name="srt_int_*"  type="integer"           indexed="true" stored="true" multiValued="false"/>
+   <dynamicField name="srt_date_*" type="date"              indexed="true" stored="true" multiValued="false"/>
+   <dynamicField name="srt_ste_*"  type="string_srt"        indexed="true" stored="true" multiValued="false"/>
+
+ </fields>
+
+ <uniqueKey>id</uniqueKey>
+ <defaultSearchField>allfields</defaultSearchField>
+ <copyField source="*" dest="allfields"/>
+
+ <!-- Default Boolean Operator -->
+ <solrQueryParser defaultOperator="AND"/>
+
+ <!--similarity class="org.apache.lucene.search.DefaultSimilarity"/-->
+
+</schema>

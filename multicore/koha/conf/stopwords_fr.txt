@@ -1,0 +1,13 @@
+#based on http://www.dot-seo.com/french-stop-words/ list
+a
+das
+den
+die
+el
+l'
+la
+le
+les
+un
+une
+ed.
