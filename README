@@ -1,0 +1,5 @@
+
+Setup:
+
+> Change SOLR_HOME and SOLR_CONF_HOME in launch_solr.sh file
+> Launch it: ./launch_solr.sh
